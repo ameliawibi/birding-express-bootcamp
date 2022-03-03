@@ -4,7 +4,7 @@
     <h2 class="text-lg">Bird Sighting Entry</h2>
   <p>Tell us what you saw!</p>
   <br/>
- <label class="label" for="date">Date</label>
+ <label for="date">Date</label>
       <div class="relative">
       <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
       </div>
@@ -27,7 +27,7 @@
 <label for="time">Time</label>
       <div class="flex justify-left">
       <div class="timepicker relative mb-3 w-full">
-    <input type="text"
+    <input type="text" name="time"
       class="form-control block
         w-full
         px-3
@@ -43,13 +43,12 @@
         m-0
         focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
       placeholder="HH:MM AM/PM" />
-    <label for="floatingInput" class="text-gray-400"></label>
   </div>
       </div>
       <br/>
 <div class="form-group mb-6">
-      <span class="text-gray-700">Appearance</span>
-      <input type="text" class="form-control block
+      <label class="text-gray-700" for="appearance">Appearance</label>
+      <input type="text" name="appearance" class="form-control block
         w-full
         px-3
         py-1.5
@@ -84,8 +83,8 @@
         placeholder="Flock size">
     </div>
     <div class="form-group mb-6">
-      <span class="text-gray-700">Vocalization</span>
-      <input type="text" class="form-control block
+      <label for="vocalization" class="text-gray-700">Vocalization</label>
+      <input name="vocalization" type="text" class="form-control block
         w-full
         px-3
         py-1.5
@@ -102,9 +101,9 @@
         placeholder="Vocalization">
     </div>
     <div class="form-group mb-6">
-      <span class="text-gray-700">Habitat</span>
+      <label for="habitat" class="text-gray-700">Habitat</label>
       <textarea
-      class="
+      name="habitat" class="
         form-control
         block
         w-full
