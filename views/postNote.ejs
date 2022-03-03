@@ -4,131 +4,50 @@
     <h2 class="text-lg">Bird Sighting Entry</h2>
   <p>Tell us what you saw!</p>
   <br/>
- <label for="date">Date</label>
+ <label for="date" class="label">Date</label>
       <div class="relative">
       <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
       </div>
-      <input id="date" name="date" datepicker type="text" class="form-control block
-        w-full
-        px-3
-        py-1.5
-        text-base
-        font-normal
-        text-gray-700
-        bg-white bg-clip-padding
-        border border-solid border-gray-300
-        rounded
-        transition
-        ease-in-out
-        m-0
-        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" placeholder="MM/DD/YYYY">
+      <input id="date" name="date" datepicker type="text" class="form-control input" placeholder="MM/DD/YYYY">
       </div>
       <br/>
-<label for="time">Time</label>
+<label for="time" class="label">Time</label>
       <div class="flex justify-left">
       <div class="timepicker relative mb-3 w-full">
     <input type="text" name="time"
-      class="form-control block
-        w-full
-        px-3
-        py-1.5
-        text-base
-        font-normal
-        text-gray-700
-        bg-white bg-clip-padding
-        border border-solid border-gray-300
-        rounded
-        transition
-        ease-in-out
-        m-0
-        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+      class="form-control input"
       placeholder="HH:MM AM/PM" />
   </div>
       </div>
       <br/>
 <div class="form-group mb-6">
-      <label class="text-gray-700" for="appearance">Appearance</label>
-      <input type="text" name="appearance" class="form-control block
-        w-full
-        px-3
-        py-1.5
-        text-base
-        font-normal
-        text-gray-700
-        bg-white bg-clip-padding
-        border border-solid border-gray-300
-        rounded
-        transition
-        ease-in-out
-        m-0
-        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" id="exampleInput7"
+      <label class="label" for="appearance">Appearance</label>
+      <input type="text" name="appearance" class="form-control input" id="exampleInput7"
         placeholder="Appearance">
     </div>
     <div class="form-group mb-6">
-      <span class="text-gray-700">Flock size</span>
-      <input type="text" class="form-control block
-        w-full
-        px-3
-        py-1.5
-        text-base
-        font-normal
-        text-gray-700
-        bg-white bg-clip-padding
-        border border-solid border-gray-300
-        rounded
-        transition
-        ease-in-out
-        m-0
-        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" id="exampleInput7"
+      <label for="flock_size" class="label">Flock size</label>
+      <input type="number" class="form-control input" id="exampleInput7" name="flock_size"
         placeholder="Flock size">
     </div>
     <div class="form-group mb-6">
-      <label for="vocalization" class="text-gray-700">Vocalization</label>
-      <input name="vocalization" type="text" class="form-control block
-        w-full
-        px-3
-        py-1.5
-        text-base
-        font-normal
-        text-gray-700
-        bg-white bg-clip-padding
-        border border-solid border-gray-300
-        rounded
-        transition
-        ease-in-out
-        m-0
-        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" id="exampleInput8"
+      <label for="vocalization" class="label">Vocalization</label>
+      <input name="vocalization" type="text" class="form-control input" id="exampleInput8"
         placeholder="Vocalization">
     </div>
     <div class="form-group mb-6">
-      <label for="habitat" class="text-gray-700">Habitat</label>
+      <label for="habitat" class="label">Habitat</label>
       <textarea
-      name="habitat" class="
-        form-control
-        block
-        w-full
-        px-3
-        py-1.5
-        text-base
-        font-normal
-        text-gray-700
-        bg-white bg-clip-padding
-        border border-solid border-gray-300
-        rounded
-        transition
-        ease-in-out
-        m-0
-        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none
-      "
+      name="habitat" class="form-control input"
       id="exampleFormControlTextarea13"
       rows="3"
       placeholder="Habitat"
     ></textarea>
     </div>
-    <div class="form-group form-check text-center mb-6">
-      <label for ="behaviour" class="block text-left w-full">
-  <span class="text-gray-700">Behaviour</span>
-  <select name="behaviour" class="form-multiselect block w-full mt-1" multiple>
+    <div class="form-group form-check text-left mb-6">
+      <label for ="behaviour" class="label">
+  Behaviour
+  <select name="behaviour" class="form-multiselect block w-full mt-1 input" multiple>
     <option>Option 1</option>
     <option>Option 2</option>
     <option>Option 3</option>
@@ -137,24 +56,7 @@
   </select>
 </label>
     </div>
-    <button type="submit" class="
-      w-full
-      px-6
-      py-2.5
-      bg-blue-600
-      text-white
-      font-medium
-      text-xs
-      leading-tight
-      uppercase
-      rounded
-      shadow-md
-      hover:bg-blue-700 hover:shadow-lg
-      focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0
-      active:bg-blue-800 active:shadow-lg
-      transition
-      duration-150
-      ease-in-out">Send</button>
+    <button type="submit" class="btn">Submit</button>
   </form>
   </div>
   </body>
