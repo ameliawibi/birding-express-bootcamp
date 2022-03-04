@@ -1,0 +1,23 @@
+<%- include('header', {title: `Home`}); -%>
+<div class="flex justify-center my-1">
+  <div class="rounded-lg shadow-lg bg-white max-w-sm">
+      <img class="rounded-t-lg w-full" src="<%= photo_url%>" alt=""/>
+
+    <div class="p-6">
+      <h5 class="text-gray-900 text-xl font-medium mb-2">Bird <%=id%></h5>
+      <p class="text-gray-700 text-base">
+        Vocalization:
+      </p><p class="text-gray-700 text-base mb-4">
+        <%=vocalization%>
+      </p><p class="text-gray-700 text-base">
+        Habitat:
+      </p>
+      <p class="text-gray-700 text-base mb-4">
+        <%=habitat%>
+      </p>
+      <button type="button" class=" btn">Edit</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
