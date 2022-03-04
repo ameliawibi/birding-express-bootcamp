@@ -8,7 +8,7 @@ date_time TEXT,
 photo_url TEXT,
 flock_size INTEGER,
 vocalization TEXT,
-habitat TEXT
+habitat TEXT,
 );
 
 CREATE TABLE behaviour (

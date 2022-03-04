@@ -39,26 +39,58 @@ app.get("/note", (req, res) => {
 
 app.post("/note", (req, res) => {
   console.log(req.body);
-  let notes = req.body;
-  let datetime = notes.date.concat(" ", notes.time);
+  const notes = req.body;
+  const datetime = notes.date.concat(" ", notes.time);
   //console.log(datetime);
-  let sqlQuery =
-    "INSERT INTO notes (date_time,photo_url,flock_size,vocalization,habitat) VALUES ($1, $2, $3, $4, $5)";
+  const notesQuery =
+    "INSERT INTO notes (date_time,photo_url,flock_size,vocalization,habitat) VALUES ($1, $2, $3, $4, $5) RETURNING ID";
 
-  let inputData = [
+  const notesInputData = [
     datetime,
     notes.photo_url,
     Number(notes.flock_size),
     notes.vocalization,
     notes.habitat,
   ];
-  pool.query(sqlQuery, inputData, whenQueryDone);
-  res.send("post success");
+
+  pool.query(
+    notesQuery,
+    notesInputData,
+    (notesQueryError, notesQueryResult) => {
+      if (notesQueryError) {
+        console.error("Notes query error", notesQueryError);
+        return;
+      }
+      console.table(notesQueryResult.rows); //return id for notes_id
+      const behaviourArray = notes.behaviour;
+      const noteId = notesQueryResult.rows[0].id;
+      console.log(`noteId =${noteId}`);
+
+      behaviourArray.forEach((behaviour) => {
+        const behaviourQuery = `INSERT INTO behaviour (actions,notes_id) VALUES ($1, $2) returning actions`;
+        const behaviourData = [behaviour, noteId];
+        pool.query(
+          behaviourQuery,
+          behaviourData,
+          (behaviourQueryError, behaviourQueryResult) => {
+            if (behaviourQueryError) {
+              console.log("behaviour query error", behaviourQueryError);
+            } else {
+              console.log(behaviourQueryResult.rows);
+            }
+          }
+        );
+      });
+      res.send("post success");
+    }
+  );
 });
 
 app.get("/note/:id", (req, res) => {
-  const { notesid } = req.params;
-  let sqlQuery = `SELECT * FROM notes INNER JOIN behaviour ON notes.id = behaviour.notes_id`;
+  const { id } = req.params;
+  //console.log(id);
+  let sqlQuery = `SELECT * FROM notes INNER JOIN behaviour ON notes.id = behaviour.notes_id WHERE notes.id=${id}`;
+  //console.log(sqlQuery);
 
   pool.query(sqlQuery, (error, result) => {
     if (error) {
