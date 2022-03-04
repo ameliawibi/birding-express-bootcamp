@@ -43,11 +43,11 @@ app.post("/note", (req, res) => {
   let datetime = notes.date.concat(" ", notes.time);
   //console.log(datetime);
   let sqlQuery =
-    "INSERT INTO notes (date_time,appearance,flock_size,vocalization,habitat,behaviour) VALUES ($1, $2, $3, $4, $5, $6)";
+    "INSERT INTO notes (date_time,photo_url,flock_size,vocalization,habitat,behaviour) VALUES ($1, $2, $3, $4, $5, $6)";
 
   let inputData = [
     datetime,
-    notes.appearance,
+    notes.photo_url,
     Number(notes.flock_size),
     notes.vocalization,
     notes.habitat,
