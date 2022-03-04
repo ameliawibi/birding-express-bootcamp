@@ -103,8 +103,9 @@ app.get("/note/:id", (req, res) => {
 
       let ejsData = result.rows;
       console.table(ejsData);
-      res.send("get success");
-      //res.render("viewNote", ejsData);
+      console.log(ejsData);
+      //res.send("get success");
+      res.render("viewNote", { ejsData: ejsData });
     }
   });
 });
