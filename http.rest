@@ -1,5 +1,5 @@
 GET http://localhost:3006/note
 ###
 
-GET http://localhost:3006/note/1
+GET http://localhost:3006/note/20
 ###
