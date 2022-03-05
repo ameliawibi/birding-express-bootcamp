@@ -34,7 +34,12 @@ app.use(methodOverride("_method"));
 app.use(cookieParser());
 
 app.get("/note", (req, res) => {
-  res.render("postNote");
+  pool.query("SELECT * from behaviour", (error, optionsQueryResult) => {
+    const data = {
+      actions: optionsQueryResult.rows,
+    };
+    res.render("postNote", data);
+  });
 });
 
 app.post("/note", (req, res) => {
@@ -43,7 +48,7 @@ app.post("/note", (req, res) => {
   const datetime = notes.date.concat(" ", notes.time);
   //console.log(datetime);
   const notesQuery =
-    "INSERT INTO notes (date_time,photo_url,flock_size,vocalization,habitat) VALUES ($1, $2, $3, $4, $5) RETURNING ID";
+    "INSERT INTO notes (date_time,photo_url,flock_size,vocalization,habitat,user_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING ID";
 
   const notesInputData = [
     datetime,
@@ -51,6 +56,7 @@ app.post("/note", (req, res) => {
     Number(notes.flock_size),
     notes.vocalization,
     notes.habitat,
+    1,
   ];
 
   pool.query(
@@ -61,14 +67,15 @@ app.post("/note", (req, res) => {
         console.error("Notes query error", notesQueryError);
         return;
       }
-      console.table(notesQueryResult.rows); //return id for notes_id
+      //console.table(notesQueryResult.rows); //return id for notes_id
       const behaviourArray = notes.behaviour;
       const noteId = notesQueryResult.rows[0].id;
-      console.log(`noteId =${noteId}`);
+      //console.log(`noteId =${noteId}`);
 
-      behaviourArray.forEach((behaviour) => {
-        const behaviourQuery = `INSERT INTO behaviour (actions,notes_id) VALUES ($1, $2) returning actions`;
-        const behaviourData = [behaviour, noteId];
+      behaviourArray.forEach((behaviourId) => {
+        const behaviourQuery = `INSERT INTO notes_behaviour (notes_id,behaviour_id) VALUES ($1,$2) returning behaviour_id`;
+        const behaviourData = [noteId, behaviourId];
+        //insert action into behaviour table
         pool.query(
           behaviourQuery,
           behaviourData,
@@ -76,7 +83,7 @@ app.post("/note", (req, res) => {
             if (behaviourQueryError) {
               console.log("behaviour query error", behaviourQueryError);
             } else {
-              console.log(behaviourQueryResult.rows);
+              console.table(behaviourQueryResult.rows);
             }
           }
         );
@@ -89,7 +96,7 @@ app.post("/note", (req, res) => {
 app.get("/note/:id", (req, res) => {
   const { id } = req.params;
   //console.log(id);
-  let sqlQuery = `SELECT * FROM notes INNER JOIN behaviour ON notes.id = behaviour.notes_id WHERE notes.id=${id}`;
+  let sqlQuery = `SELECT * FROM notes INNER JOIN notes_behaviour ON notes.id = notes_behaviour.notes_id INNER JOIN behaviour ON behaviour.id = notes_behaviour.behaviour_id WHERE notes.id=${id}`;
   //console.log(sqlQuery);
 
   pool.query(sqlQuery, (error, result) => {
@@ -102,8 +109,8 @@ app.get("/note/:id", (req, res) => {
       //console.table(result.rows);
 
       let ejsData = result.rows;
-      console.table(ejsData);
       console.log(ejsData);
+      //console.log(ejsData);
       //res.send("get success");
       res.render("viewNote", { ejsData: ejsData });
     }

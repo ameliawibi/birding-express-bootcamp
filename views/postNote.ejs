@@ -48,11 +48,9 @@
       <label for ="behaviour" class="label">
   Behaviour
   <select name="behaviour" class="form-multiselect block w-full mt-1 input" multiple>
-    <option>Option 1</option>
-    <option>Option 2</option>
-    <option>Option 3</option>
-    <option>Option 4</option>
-    <option>Option 5</option>
+<% actions.forEach((item) => { %>
+    <option value="<%= item.id %>"><%= item.actions %></option>
+    <% }); %>
   </select>
 </label>
     </div>
