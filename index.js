@@ -248,6 +248,7 @@ app.get("/note/:id", (req, res) => {
         ejsData.actions.push(data.actions);
       });
       ejsData.species_name = result.rows[0].species_name;
+      ejsData.scientific_name = result.rows[0].scientific_name;
       //console.log(ejsData);
 
       let commentQuery = `SELECT * FROM comments WHERE notes_id=${id}`;
