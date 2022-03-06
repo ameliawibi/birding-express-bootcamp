@@ -2,6 +2,7 @@ import express from "express";
 import pg from "pg";
 import methodOverride from "method-override";
 import cookieParser from "cookie-parser";
+import jsSHA from "jssha";
 
 const { Pool } = pg;
 // set the way we will connect to the server
@@ -14,7 +15,8 @@ const pgConnectionConfigs = {
 
 // create the var we'll use
 const pool = new Pool(pgConnectionConfigs);
-
+// initialise the SHA object
+const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
 const whenQueryDone = (error, result) => {
   if (error) {
     console.log("Error executing query", error.stack);
@@ -38,10 +40,16 @@ app.get("/signup", (req, res) => {
 });
 
 app.post("/signup", (req, res) => {
-  const { email, password } = req.body;
+  // input the password from the request to the SHA object
+  shaObj.update(req.body.password);
+  // get the hashed password as output from the SHA object
+  const hashedPassword = shaObj.getHash("HEX");
+
+  const values = [req.body.email, hashedPassword];
 
   pool.query(
-    `INSERT INTO users (user_email,user_password) VALUES ('${email}','${password}')`,
+    `INSERT INTO users (user_email,user_password) VALUES ($1, $2)`,
+    values,
     (error, queryResult) => {
       if (error) {
         console.log("Error executing query", error.stack);
@@ -57,7 +65,6 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  //console.log("request came in");
   const values = [req.body.email.toLowerCase()];
   //console.log(values);
 
@@ -79,8 +86,11 @@ app.post("/login", (req, res) => {
       }
 
       const user = result.rows[0];
-
-      if (user.user_password === req.body.password) {
+      // input the password from the request to the SHA object
+      shaObj.update(req.body.password);
+      // get the hashed value as output from the SHA object
+      const hashedPassword = shaObj.getHash("HEX");
+      if (user.user_password === hashedPassword) {
         res.cookie("loggedIn", true);
         res.cookie("userID", `${user.id}`);
         res.redirect("/");
