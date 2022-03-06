@@ -1,6 +1,36 @@
-GET http://localhost:3006/
-
+GET http://localhost:3006/signup
 ###
+
+POST http://localhost:3006/signup
+Content-Type: application/x-www-form-urlencoded
+
+email=example2@email.com
+&password=password
+###
+
+GET http://localhost:3006/login
+###
+
+POST http://localhost:3006/login
+Content-Type: application/x-www-form-urlencoded
+
+email=wrong@email.com
+&password=wrong
+###
+
+POST http://localhost:3006/login
+Content-Type: application/x-www-form-urlencoded
+
+email=example@email.com
+&password=password
+###
+
+GET http://localhost:3006/logout
+###
+
+GET http://localhost:3006/
+###
+
 GET http://localhost:3006/note
 ###
 

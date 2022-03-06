@@ -33,7 +33,78 @@ app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride("_method"));
 app.use(cookieParser());
 
+app.get("/signup", (req, res) => {
+  res.render("signUp");
+});
+
+app.post("/signup", (req, res) => {
+  const { email, password } = req.body;
+
+  pool.query(
+    `INSERT INTO users (user_email,user_password) VALUES ('${email}','${password}')`,
+    (error, queryResult) => {
+      if (error) {
+        console.log("Error executing query", error.stack);
+        return res.status(503).send("Service is unavailable");
+      }
+      res.redirect("/login");
+    }
+  );
+});
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.post("/login", (req, res) => {
+  //console.log("request came in");
+  const values = [req.body.email.toLowerCase()];
+  //console.log(values);
+
+  pool.query(
+    "SELECT * from users WHERE user_email=$1",
+    values,
+    (error, result) => {
+      if (error) {
+        console.log("Error executing query", error.stack);
+        res.status(503).send("Service is unavailable");
+        return;
+      }
+
+      if (result.rows.length === 0) {
+        // we didnt find a user with that email.
+        // the error for password and user are the same. don't tell the user which error they got for security reasons, otherwise people can guess if a person is a user of a given service.
+        res.status(403).send("User does not exist");
+        return;
+      }
+
+      const user = result.rows[0];
+
+      if (user.user_password === req.body.password) {
+        res.cookie("loggedIn", true);
+        res.cookie("userID", `${user.id}`);
+        res.redirect("/");
+      } else {
+        // password didn't match
+        // the error for password and user are the same. don't tell the user which error they got for security reasons, otherwise people can guess if a person is a user of a given service.
+        res.status(403).send("User does not exist");
+      }
+    }
+  );
+});
+
+app.get("/logout", (req, res) => {
+  res.clearCookie("loggedIn");
+  res.clearCookie("userID");
+  res.redirect("/login");
+});
+
 app.get("/", (req, res) => {
+  if (req.cookies.loggedIn === undefined) {
+    res.status(403).send("sorry, please log in!");
+    return;
+  }
+
   let sqlQuery = `SELECT notes.id,notes.date_time,notes.flock_size,species.species_name FROM notes INNER JOIN species ON notes.species_id = species.id`;
   //console.log(sqlQuery);
 
@@ -55,6 +126,10 @@ app.get("/", (req, res) => {
 });
 
 app.get("/note", (req, res) => {
+  if (req.cookies.loggedIn === undefined) {
+    res.status(403).send("sorry, please log in!");
+    return;
+  }
   let data = {};
   pool.query("SELECT * from behaviour", (error, behaviourOptionsResult) => {
     if (error) {
@@ -78,7 +153,11 @@ app.get("/note", (req, res) => {
 });
 
 app.post("/note", (req, res) => {
-  console.log(req.body);
+  if (req.cookies.loggedIn === undefined || req.cookies.userID === undefined) {
+    res.status(403).send("sorry, please log in!");
+    return;
+  }
+  //console.log(req.body);
   const notes = req.body;
   const datetime = notes.date.concat(" ", notes.time);
   //console.log(datetime);
@@ -90,7 +169,7 @@ app.post("/note", (req, res) => {
     notes.photo_url,
     Number(notes.flock_size),
     Number(notes.species),
-    1,
+    Number(req.cookies.userID),
   ];
 
   pool.query(
@@ -128,6 +207,10 @@ app.post("/note", (req, res) => {
 });
 
 app.get("/note/:id", (req, res) => {
+  if (req.cookies.loggedIn === undefined) {
+    res.status(403).send("sorry, please log in!");
+    return;
+  }
   const { id } = req.params;
   //console.log(id);
   let sqlQuery = `SELECT * FROM notes INNER JOIN notes_behaviour ON notes.id = notes_behaviour.notes_id INNER JOIN behaviour ON behaviour.id = notes_behaviour.behaviour_id INNER JOIN species ON notes.species_id = species.id WHERE notes.id=${id}`;
@@ -143,7 +226,7 @@ app.get("/note/:id", (req, res) => {
       //console.table(result.rows);
 
       let ejsData = result.rows;
-      console.log(ejsData);
+      //console.log(ejsData);
       //res.send("get view success");
       res.render("viewNote", { ejsData: ejsData });
     }
