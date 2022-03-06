@@ -33,6 +33,27 @@ app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride("_method"));
 app.use(cookieParser());
 
+app.get("/", (req, res) => {
+  let sqlQuery = `SELECT notes.id,notes.date_time,notes.flock_size,species.species_name FROM notes INNER JOIN species ON notes.species_id = species.id`;
+  //console.log(sqlQuery);
+
+  pool.query(sqlQuery, (error, result) => {
+    if (error) {
+      console.log("Error executing query", error.stack);
+      return;
+    }
+    if (result.rows) {
+      // this is the output
+      //console.table(result.rows);
+
+      let ejsData = result.rows;
+      //console.log(ejsData);
+      //res.send("homepage success");
+      res.render("home", { ejsData: ejsData });
+    }
+  });
+});
+
 app.get("/note", (req, res) => {
   let data = {};
   pool.query("SELECT * from behaviour", (error, behaviourOptionsResult) => {
@@ -68,7 +89,7 @@ app.post("/note", (req, res) => {
     datetime,
     notes.photo_url,
     Number(notes.flock_size),
-    notes.species,
+    Number(notes.species),
     1,
   ];
 

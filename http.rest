@@ -1,3 +1,6 @@
+GET http://localhost:3006/
+
+###
 GET http://localhost:3006/note
 ###
 
@@ -8,8 +11,7 @@ date=02/01/2021
 &time=06:00 PM
 &photo_url=https://picsum.photos/id/1024/300/200
 &flock_size=40
-&vocalization=vocalization value
-&habitat_value=habitat value
+&species=6
 &user_id=1
 &behaviour=1
 &behaviour=2
