@@ -238,8 +238,17 @@ app.get("/note/:id", (req, res) => {
       // this is the output
       //console.table(result.rows);
 
-      let ejsData = result.rows;
-      //console.log(ejsData);
+      let ejsData = {};
+      ejsData.id = result.rows[0].id;
+      ejsData.date_time = result.rows[0].date_time;
+      ejsData.photo_url = result.rows[0].photo_url;
+      ejsData.flock_size = result.rows[0].flock_size;
+      ejsData.actions = [];
+      result.rows.forEach((data) => {
+        ejsData.actions.push(data.actions);
+      });
+      ejsData.species_name = result.rows[0].species_name;
+      console.log(ejsData);
       //res.send("get view success");
       res.render("viewNote", { ejsData: ejsData });
     }
