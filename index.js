@@ -231,7 +231,7 @@ app.get("/note/:id", (req, res) => {
 
   pool.query(sqlQuery, (error, result) => {
     if (error) {
-      console.log("Error executing query", error.stack);
+      console.log("Error executing 1st query", error.stack);
       return;
     }
     if (result.rows) {
@@ -248,9 +248,20 @@ app.get("/note/:id", (req, res) => {
         ejsData.actions.push(data.actions);
       });
       ejsData.species_name = result.rows[0].species_name;
-      console.log(ejsData);
-      //res.send("get view success");
-      res.render("viewNote", { ejsData: ejsData });
+      //console.log(ejsData);
+
+      let commentQuery = `SELECT * FROM comments WHERE notes_id=${id}`;
+      pool.query(commentQuery, (commentError, commentResult) => {
+        if (commentError) {
+          console.log("Error executing 2nd query", commentError.stack);
+          return;
+        }
+        if (commentResult.rows) {
+          ejsData.comments = commentResult.rows;
+          console.log(ejsData);
+          res.render("viewNote", { ejsData: ejsData });
+        }
+      });
     }
   });
 });
