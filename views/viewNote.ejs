@@ -4,16 +4,16 @@
       <img class="rounded-t-lg w-full" src="<%= ejsData[0].photo_url%>" alt=""/>
 
     <div class="p-6">
-      <h5 class="text-gray-900 text-xl font-medium mb-2">Bird <%=ejsData[0].id%></h5>
+      <h5 class="text-gray-900 text-xl font-medium mb-2"><%=ejsData[0].species_name%></h5>
       <p class="text-gray-700 text-base">
         Flock size:
       </p><p class="text-gray-700 text-base mb-4">
         <%= ejsData[0].flock_size%>
       </p><p class="text-gray-700 text-base">
-        Habitat:
+        Scientific name:
       </p>
       <p class="text-gray-700 text-base mb-4">
-        <%=ejsData[0].habitat%>
+        <%=ejsData[0].scientific_name%>
       </p>
       
       <div class="flex flex-wrap justify-left space-x-2">

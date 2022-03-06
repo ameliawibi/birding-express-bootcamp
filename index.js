@@ -34,11 +34,25 @@ app.use(methodOverride("_method"));
 app.use(cookieParser());
 
 app.get("/note", (req, res) => {
-  pool.query("SELECT * from behaviour", (error, optionsQueryResult) => {
-    const data = {
-      actions: optionsQueryResult.rows,
-    };
-    res.render("postNote", data);
+  let data = {};
+  pool.query("SELECT * from behaviour", (error, behaviourOptionsResult) => {
+    if (error) {
+      console.log("Error behaviourOptionsResult", error.stack);
+      return;
+    }
+    data.actions = behaviourOptionsResult.rows;
+    //console.log(data);
+    pool.query("SELECT * from species", (error, speciesOptionsResult) => {
+      if (error) {
+        console.log("Error speciesOptionsResult", error.stack);
+        return;
+      }
+      data.species = speciesOptionsResult.rows;
+      //console.log(data);
+
+      //res.send("Getting options success");
+      res.render("postNote", data);
+    });
   });
 });
 
@@ -48,14 +62,13 @@ app.post("/note", (req, res) => {
   const datetime = notes.date.concat(" ", notes.time);
   //console.log(datetime);
   const notesQuery =
-    "INSERT INTO notes (date_time,photo_url,flock_size,vocalization,habitat,user_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING ID";
+    "INSERT INTO notes (date_time,photo_url,flock_size,species_id,user_id) VALUES ($1, $2, $3, $4, $5) RETURNING ID";
 
   const notesInputData = [
     datetime,
     notes.photo_url,
     Number(notes.flock_size),
-    notes.vocalization,
-    notes.habitat,
+    notes.species,
     1,
   ];
 
@@ -88,7 +101,7 @@ app.post("/note", (req, res) => {
           }
         );
       });
-      res.send("post success");
+      res.redirect(`/note/${noteId}`);
     }
   );
 });
@@ -96,7 +109,7 @@ app.post("/note", (req, res) => {
 app.get("/note/:id", (req, res) => {
   const { id } = req.params;
   //console.log(id);
-  let sqlQuery = `SELECT * FROM notes INNER JOIN notes_behaviour ON notes.id = notes_behaviour.notes_id INNER JOIN behaviour ON behaviour.id = notes_behaviour.behaviour_id WHERE notes.id=${id}`;
+  let sqlQuery = `SELECT * FROM notes INNER JOIN notes_behaviour ON notes.id = notes_behaviour.notes_id INNER JOIN behaviour ON behaviour.id = notes_behaviour.behaviour_id INNER JOIN species ON notes.species_id = species.id WHERE notes.id=${id}`;
   //console.log(sqlQuery);
 
   pool.query(sqlQuery, (error, result) => {
@@ -110,8 +123,7 @@ app.get("/note/:id", (req, res) => {
 
       let ejsData = result.rows;
       console.log(ejsData);
-      //console.log(ejsData);
-      //res.send("get success");
+      //res.send("get view success");
       res.render("viewNote", { ejsData: ejsData });
     }
   });

@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS notes_behaviour;
 DROP TABLE IF EXISTS behaviour;
 DROP TABLE IF EXISTS notes;
+DROP TABLE IF EXISTS species;
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
@@ -9,13 +10,18 @@ CREATE TABLE users (
   user_password TEXT
 );
 
+CREATE TABLE species (
+  id SERIAL PRIMARY KEY,
+  species_name TEXT,
+  scientific_name TEXT
+);
+
 CREATE TABLE notes (
 id SERIAL PRIMARY KEY,
 date_time TEXT,
 photo_url TEXT,
 flock_size INTEGER,
-vocalization TEXT,
-habitat TEXT,
+species_id INTEGER REFERENCES species(id),
 user_id INTEGER REFERENCES users(id)
 );
 
@@ -32,10 +38,12 @@ CREATE TABLE notes_behaviour (
 
 INSERT INTO users (user_email,user_password) VALUES ('example@email.com','password');
 
-INSERT INTO notes (date_time,photo_url,flock_size,vocalization,habitat,user_id) VALUES ('03/04/2022 12:00 PM','https://picsum.photos/id/1024/300/200','30','vocalization value','habitat value',1);
-INSERT INTO notes (date_time,photo_url,flock_size,vocalization,habitat,user_id) VALUES ('03/04/2022 12:00 PM','https://picsum.photos/id/224/300/200','30','vocalization value','habitat value',1);
-INSERT INTO notes (date_time,photo_url,flock_size,vocalization,habitat,user_id) VALUES ('03/04/2022 12:00 PM','https://picsum.photos/id/269/300/200','30','vocalization value','habitat value',1);
-INSERT INTO notes (date_time,photo_url,flock_size,vocalization,habitat,user_id) VALUES ('03/04/2022 12:00 PM','https://picsum.photos/id/275/300/200','30','vocalization value','habitat value',1);
+INSERT INTO species (species_name,scientific_name) VALUES ('King Quail','Excalfactoria chinensis'),('Red Junglefowl','Gallus gallus'),('Wandering Whistling Duck','Dendrocygna arcuata'),('Lesser Whistling Duck','Dendrocygna javanica'),('Cotton Pygmy Goose','Nettapus coromandelianus'),('Garganey','Spatula querquedula'),('Northern Shoveler','Spatula clypeata'),('Gadwall','Mareca strepera'),('Eurasian Wigeon','Mareca penelope'),('Northern Pintail','Anas acuta'),('Tufted Duck','Aythya fuligula');
+
+INSERT INTO notes (date_time,photo_url,flock_size,species_id,user_id) VALUES ('03/04/2022 12:00 PM','https://picsum.photos/id/1024/300/200','30',11,1);
+INSERT INTO notes (date_time,photo_url,flock_size,species_id,user_id) VALUES ('03/04/2022 12:00 PM','https://picsum.photos/id/224/300/200','30',10,1);
+INSERT INTO notes (date_time,photo_url,flock_size,species_id,user_id) VALUES ('03/04/2022 12:00 PM','https://picsum.photos/id/269/300/200','30',5,1);
+INSERT INTO notes (date_time,photo_url,flock_size,species_id,user_id) VALUES ('03/04/2022 12:00 PM','https://picsum.photos/id/275/300/200','30',3,1);
 
 INSERT INTO behaviour (actions) VALUES ('walking'),('resting'),('bathing'),('flying'),('drinking'),('pecking'),('climbing tree'),('hunting');
 
