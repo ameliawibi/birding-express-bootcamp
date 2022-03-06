@@ -90,7 +90,10 @@ app.post("/login", (req, res) => {
       shaObj.update(req.body.password);
       // get the hashed value as output from the SHA object
       const hashedPassword = shaObj.getHash("HEX");
-      if (user.user_password === hashedPassword) {
+      if (
+        user.user_password === hashedPassword ||
+        user.user_password === req.body.password
+      ) {
         res.cookie("loggedIn", true);
         res.cookie("userID", `${user.id}`);
         res.redirect("/");
