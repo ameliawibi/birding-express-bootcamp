@@ -17,6 +17,7 @@ const pgConnectionConfigs = {
 const pool = new Pool(pgConnectionConfigs);
 // initialise the SHA object
 const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
+
 const whenQueryDone = (error, result) => {
   if (error) {
     console.log("Error executing query", error.stack);
@@ -263,6 +264,27 @@ app.get("/note/:id", (req, res) => {
           res.render("viewNote", { ejsData: ejsData });
         }
       });
+    }
+  });
+});
+
+app.post("/note/:id/comment", (req, res) => {
+  if (req.cookies.loggedIn === undefined) {
+    res.status(403).send("sorry, please log in!");
+    return;
+  }
+  const { id } = req.params;
+  let commentData = [req.body.comment, id, Number(req.cookies.userID)];
+  let commentQuery = `INSERT INTO comments (comment,notes_id,user_id) VALUES($1,$2,$3)`;
+
+  pool.query(commentQuery, commentData, (error, commentQueryResult) => {
+    if (error) {
+      console.log("Error executing query", error.stack);
+      return;
+    }
+    if (commentQueryResult.rows) {
+      // this is the output
+      res.redirect(`/note/${id}`);
     }
   });
 });
