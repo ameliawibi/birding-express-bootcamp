@@ -1,9 +1,9 @@
-DROP TABLE IF EXISTS notes_behaviour;
-DROP TABLE IF EXISTS behaviour;
-DROP TABLE IF EXISTS notes;
-DROP TABLE IF EXISTS comments;
-DROP TABLE IF EXISTS species;
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS notes_behaviour CASCADE;
+DROP TABLE IF EXISTS behaviour CASCADE;
+DROP TABLE IF EXISTS notes CASCADE;
+DROP TABLE IF EXISTS comments CASCADE;
+DROP TABLE IF EXISTS species CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
@@ -18,20 +18,38 @@ CREATE TABLE species (
 );
 
 CREATE TABLE notes (
-id SERIAL PRIMARY KEY,
-date_time TEXT,
-photo_url TEXT,
-flock_size INTEGER,
-species_id INTEGER REFERENCES species(id),
-user_id INTEGER REFERENCES users(id)
-);
+  id SERIAL PRIMARY KEY,
+  date_time TEXT,
+  photo_url TEXT,
+  flock_size INTEGER,
+  species_id INTEGER,
+  user_id INTEGER,
+  CONSTRAINT fk_notes_species_id
+  FOREIGN KEY (species_id)
+  REFERENCES species(id)
+  ON DELETE CASCADE
+  ,
+  CONSTRAINT fk_notes_user_id
+  FOREIGN KEY (user_id)
+  REFERENCES users(id)
+  ON DELETE CASCADE
+  );
 
 CREATE TABLE comments (
   id SERIAL PRIMARY KEY,
   comment TEXT,
-  notes_id INTEGER REFERENCES notes(id),
-  user_id INTEGER REFERENCES users(id)
-);
+  notes_id INTEGER,
+  user_id INTEGER,
+  CONSTRAINT fk_comments_notes_id
+  FOREIGN KEY (notes_id)
+  REFERENCES notes(id)
+  ON DELETE CASCADE
+  ,
+  CONSTRAINT fk_comments_user_id
+  FOREIGN KEY (user_id)
+  REFERENCES users(id)
+  ON DELETE CASCADE
+  );
 
 CREATE TABLE behaviour (
   id SERIAL PRIMARY KEY,
@@ -40,8 +58,16 @@ CREATE TABLE behaviour (
 
 CREATE TABLE notes_behaviour (
   id SERIAL PRIMARY KEY,
-  notes_id INTEGER REFERENCES notes(id),
-  behaviour_id INTEGER REFERENCES behaviour(id)
+  notes_id INTEGER,
+  behaviour_id INTEGER,
+  CONSTRAINT fk_notesbeh_notes_id
+  FOREIGN KEY (notes_id)
+  REFERENCES notes(id)
+  ON DELETE CASCADE,
+  CONSTRAINT fk_notesbeh_behaviour_id
+  FOREIGN KEY (behaviour_id)
+  REFERENCES behaviour(id)
+  ON DELETE CASCADE
 );
 
 
