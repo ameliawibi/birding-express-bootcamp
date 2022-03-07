@@ -23,6 +23,8 @@ const pool = new Pool(pgConnectionConfigs);
 // initialise the SHA object
 const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
 
+let errorMessage = [];
+
 const whenQueryDone = (error, result) => {
   if (error) {
     console.log("Error executing query", error.stack);
@@ -144,7 +146,6 @@ app.get("/", (req, res) => {
   });
 });
 
-let errorMessage = [];
 app.get("/note", (req, res) => {
   if (req.cookies.loggedIn === undefined) {
     res.status(403).send("sorry, please log in!");
@@ -251,8 +252,8 @@ app.get("/note/:id", (req, res) => {
     if (result.rows) {
       // this is the output
       //console.table(result.rows);
-
       let ejsData = {};
+      ejsData.notes_id = id;
       ejsData.id = result.rows[0].id;
       ejsData.date_time = result.rows[0].date_time;
       ejsData.photo_url = result.rows[0].photo_url;
@@ -263,6 +264,8 @@ app.get("/note/:id", (req, res) => {
       });
       ejsData.species_name = result.rows[0].species_name;
       ejsData.scientific_name = result.rows[0].scientific_name;
+      ejsData.error = errorMessage;
+      errorMessage = [];
       //console.log(ejsData);
 
       let commentQuery = `SELECT * FROM comments WHERE notes_id=${id}`;
@@ -281,12 +284,19 @@ app.get("/note/:id", (req, res) => {
   });
 });
 
-app.post("/note/:id/comment", (req, res) => {
+app.post("/note/:id/comment", commentValidationMessages, (req, res) => {
+  const { id } = req.params;
   if (req.cookies.loggedIn === undefined) {
     res.status(403).send("sorry, please log in!");
     return;
   }
-  const { id } = req.params;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    errorMessage = errors.errors;
+    res.redirect(`/note/${id}`);
+    return;
+  }
+
   let commentData = [req.body.comment, id, Number(req.cookies.userID)];
   let commentQuery = `INSERT INTO comments (comment,notes_id,user_id) VALUES($1,$2,$3)`;
 
