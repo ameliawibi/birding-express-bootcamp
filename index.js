@@ -144,6 +144,7 @@ app.get("/", (req, res) => {
   });
 });
 
+let errorMessage = [];
 app.get("/note", (req, res) => {
   if (req.cookies.loggedIn === undefined) {
     res.status(403).send("sorry, please log in!");
@@ -163,8 +164,9 @@ app.get("/note", (req, res) => {
         return;
       }
       data.species = speciesOptionsResult.rows;
-      //console.log(data);
-
+      data.error = errorMessage;
+      console.log(data);
+      errorMessage = [];
       //res.send("Getting options success");
       res.render("postNote", data);
     });
@@ -178,7 +180,8 @@ app.post("/note", notesValidationMessages, (req, res) => {
   }
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).send(errors.errors);
+    errorMessage = errors.errors;
+    res.redirect("/note");
     return;
   }
   //console.log(req.body);

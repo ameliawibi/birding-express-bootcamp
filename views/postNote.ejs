@@ -10,6 +10,7 @@
       <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
       </div>
       <input id="date" name="date" datepicker type="text" class="form-control input" placeholder="MM/DD/YYYY">
+      <p class="errormsg"><%= error.filter(item => item.param === 'date').map(item => item.msg) %></p>
       </div>
       <br/>
 <label for="time" class="label">Time</label>
@@ -18,18 +19,21 @@
     <input type="text" name="time"
       class="form-control input"
       placeholder="HH:MM AM/PM" />
-  </div>
       </div>
+      </div>
+        <p class="errormsg -mt-3"><%= error.filter(item => item.param === 'time').map(item => item.msg) %></p>
       <br/>
 <div class="form-group mb-6">
       <label class="label" for="photo_url">Photo URL</label>
       <input type="text" name="photo_url" class="form-control input" id="exampleInput7"
         placeholder="Photo URL">
+        <p class="errormsg"><%= error.filter(item => item.param === 'photo_url').map(item => item.msg) %></p>
     </div>
     <div class="form-group mb-6">
       <label for="flock_size" class="label">Flock size</label>
       <input type="number" class="form-control input" id="exampleInput7" name="flock_size"
         placeholder="Flock size">
+        <p class="errormsg"><%= error.filter(item => item.param === 'flock_size').map(item => item.msg) %></p>
     </div>
 
     <label for ="species" class="label">
@@ -55,6 +59,7 @@
     <% }); %>
   </select>
 </label>
+<p class="errormsg"><%= error.filter(item => item.param === 'species').map(item => item.msg) %></p>
 <br/>
 
       <label for ="behaviour" class="label">
@@ -65,7 +70,7 @@
     <% }); %>
   </select>
 </label>
-
+<p class="errormsg"><%= error.filter(item => item.param === 'behaviour').map(item => item.msg) %></p>
 <br/>
     <button type="submit" class="btn">Submit</button>
     </div>
