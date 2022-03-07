@@ -1,4 +1,9 @@
 import express from "express";
+import { validationResult } from "express-validator";
+import {
+  notesValidationMessages,
+  commentValidationMessages,
+} from "./validator.js";
 import pg from "pg";
 import methodOverride from "method-override";
 import cookieParser from "cookie-parser";
@@ -166,9 +171,14 @@ app.get("/note", (req, res) => {
   });
 });
 
-app.post("/note", (req, res) => {
+app.post("/note", notesValidationMessages, (req, res) => {
   if (req.cookies.loggedIn === undefined || req.cookies.userID === undefined) {
     res.status(403).send("sorry, please log in!");
+    return;
+  }
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(422).send(errors.errors);
     return;
   }
   //console.log(req.body);
