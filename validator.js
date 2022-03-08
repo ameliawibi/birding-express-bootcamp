@@ -23,7 +23,12 @@ export const notesValidationMessages = [
     .withMessage("This field is required")
     .isURL()
     .withMessage("Please enter a valid URL"),
-  check("behaviour").not().isEmpty().withMessage("This field is required"),
+  check("behaviour")
+    .not()
+    .isEmpty()
+    .withMessage("This field is required")
+    .isArray({ min: 2, max: 10 })
+    .withMessage("At least 2 is required"),
 ];
 
 export const commentValidationMessages = [

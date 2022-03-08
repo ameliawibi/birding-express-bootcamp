@@ -323,6 +323,7 @@ app.get("/note/:id", (req, res) => {
     return;
   }
   const { id } = req.params;
+
   //console.log(id);
   let sqlQuery = `SELECT * FROM notes INNER JOIN notes_behaviour ON notes.id = notes_behaviour.notes_id INNER JOIN behaviour ON behaviour.id = notes_behaviour.behaviour_id INNER JOIN species ON notes.species_id = species.id WHERE notes.id=${id}`;
   //console.log(sqlQuery);
