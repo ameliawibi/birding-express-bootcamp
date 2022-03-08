@@ -71,7 +71,7 @@ CREATE TABLE notes_behaviour (
 );
 
 
-INSERT INTO users (user_email,user_password) VALUES ('example@email.com','password');
+INSERT INTO users (user_email,user_password) VALUES ('example@email.com','b109f3bbbc244eb82441917ed06d618b9008dd09b3befd1b5e07394c706a8bb980b1d7785e5976ec049b46df5f1326af5a2ea6d103fd07c95385ffab0cacbc86');
 
 INSERT INTO species (species_name,scientific_name) VALUES ('King Quail','Excalfactoria chinensis'),('Red Junglefowl','Gallus gallus'),('Wandering Whistling Duck','Dendrocygna arcuata'),('Lesser Whistling Duck','Dendrocygna javanica'),('Cotton Pygmy Goose','Nettapus coromandelianus'),('Garganey','Spatula querquedula'),('Northern Shoveler','Spatula clypeata'),('Gadwall','Mareca strepera'),('Eurasian Wigeon','Mareca penelope'),('Northern Pintail','Anas acuta'),('Tufted Duck','Aythya fuligula');
 
