@@ -338,19 +338,20 @@ app.get("/note/:id", (req, res) => {
     if (result.rows) {
       // this is the output
       //console.table(result.rows);
-      let ejsData = {};
-      ejsData.notes_id = id;
-      ejsData.id = result.rows[0].id;
-      ejsData.date_time = result.rows[0].date_time;
-      ejsData.photo_url = result.rows[0].photo_url;
-      ejsData.flock_size = result.rows[0].flock_size;
-      ejsData.actions = [];
+      let ejsData = {
+        notes_id: id,
+        id: result.rows[0].id,
+        date_time: result.rows[0].date_time,
+        photo_url: result.rows[0].photo_url,
+        flock_size: result.rows[0].flock_size,
+        species_name: result.rows[0].species_name,
+        scientific_name: result.rows[0].scientific_name,
+        error: errorMessage,
+        actions: [],
+      };
       result.rows.forEach((data) => {
         ejsData.actions.push(data.actions);
       });
-      ejsData.species_name = result.rows[0].species_name;
-      ejsData.scientific_name = result.rows[0].scientific_name;
-      ejsData.error = errorMessage;
       errorMessage = [];
       //console.log(ejsData);
 
@@ -362,7 +363,7 @@ app.get("/note/:id", (req, res) => {
         }
         if (commentResult.rows) {
           ejsData.comments = commentResult.rows;
-          console.log(ejsData);
+          //console.log(ejsData);
           res.render("viewNote", { ejsData: ejsData });
         }
       });
