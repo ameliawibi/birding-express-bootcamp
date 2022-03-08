@@ -331,6 +331,11 @@ app.get("/note/:id", (req, res) => {
   pool.query(sqlQuery, (error, result) => {
     if (error) {
       console.log("Error executing 1st query", error.stack);
+      res.status(404).send("Page not found!");
+      return;
+    }
+    if (result.rows.length === 0) {
+      res.status(404).send("Note not found!");
       return;
     }
     if (result.rows) {
