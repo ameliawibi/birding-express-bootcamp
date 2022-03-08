@@ -7,6 +7,7 @@ import {
 import pg from "pg";
 import methodOverride from "method-override";
 import cookieParser from "cookie-parser";
+import session from "express-session";
 import jsSHA from "jssha";
 
 const { Pool } = pg;
@@ -24,6 +25,7 @@ const pool = new Pool(pgConnectionConfigs);
 const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
 
 let errorMessage = [];
+let sessionData = {};
 
 const whenQueryDone = (error, result) => {
   if (error) {
@@ -41,6 +43,16 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride("_method"));
+//session middleware
+app.set("trust proxy", 1); // trust first proxy
+app.use(
+  session({
+    secret: "keyboard cat",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 60000 },
+  })
+);
 app.use(cookieParser());
 
 app.get("/signup", (req, res) => {
@@ -117,6 +129,7 @@ app.post("/login", (req, res) => {
 app.get("/logout", (req, res) => {
   res.clearCookie("loggedIn");
   res.clearCookie("userID");
+  req.session.destroy();
   res.redirect("/login");
 });
 
@@ -151,7 +164,13 @@ app.get("/note", (req, res) => {
     res.status(403).send("sorry, please log in!");
     return;
   }
-  let data = {};
+  let data = {
+    date: "date" in sessionData ? sessionData.date : "",
+    time: "time" in sessionData ? sessionData.time : "",
+    photo_url: "photo_url" in sessionData ? sessionData.photo_url : "",
+    flock_size: "flock_size" in sessionData ? sessionData.flock_size : "",
+  };
+  sessionData = req.session;
   pool.query("SELECT * from behaviour", (error, behaviourOptionsResult) => {
     if (error) {
       console.log("Error behaviourOptionsResult", error.stack);
@@ -166,7 +185,7 @@ app.get("/note", (req, res) => {
       }
       data.species = speciesOptionsResult.rows;
       data.error = errorMessage;
-      console.log(data);
+      //console.log(data);
       errorMessage = [];
       //res.send("Getting options success");
       res.render("postNote", data);
@@ -179,9 +198,17 @@ app.post("/note", notesValidationMessages, (req, res) => {
     res.status(403).send("sorry, please log in!");
     return;
   }
+  sessionData = req.session;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    //store error message and session data
     errorMessage = errors.errors;
+    sessionData = {
+      date: req.body.date,
+      time: req.body.time,
+      photo_url: req.body.photo_url,
+      flock_size: req.body.flock_size,
+    };
     res.redirect("/note");
     return;
   }
