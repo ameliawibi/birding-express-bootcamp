@@ -39,3 +39,11 @@ export const loginValidationMessages = [
     .withMessage("Invalid email format"),
   check("password").not().isEmpty().withMessage("This field is required"),
 ];
+
+export const speciesValidationMessages = [
+  check("species_name").not().isEmpty().withMessage("This field is required"),
+  check("scientific_name")
+    .not()
+    .isEmpty()
+    .withMessage("This field is required"),
+];

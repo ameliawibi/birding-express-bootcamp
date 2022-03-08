@@ -4,6 +4,7 @@ import {
   notesValidationMessages,
   commentValidationMessages,
   loginValidationMessages,
+  speciesValidationMessages,
 } from "./validator.js";
 import pg from "pg";
 import methodOverride from "method-override";
@@ -288,6 +289,32 @@ app.post("/note", notesValidationMessages, (req, res) => {
       res.redirect(`/note/${noteId}`);
     }
   );
+});
+
+app.post("/species", speciesValidationMessages, (req, res) => {
+  if (req.cookies.loggedIn === undefined) {
+    res.status(403).send("sorry, please log in!");
+    return;
+  }
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    errorMessage = errors.errors;
+    res.redirect("/note");
+    return;
+  }
+
+  let speciesData = [req.body.species_name, req.body.scientific_name];
+  let speciesQuery = `INSERT INTO species (species_name,scientific_name) VALUES ($1,$2)`;
+  pool.query(speciesQuery, speciesData, (error, speciesQueryResult) => {
+    if (error) {
+      console.log("Error executing query", error.stack);
+      return;
+    }
+    if (speciesQueryResult.rows) {
+      // this is the output
+      res.redirect("/note");
+    }
+  });
 });
 
 app.get("/note/:id", (req, res) => {
