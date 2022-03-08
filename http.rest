@@ -51,3 +51,6 @@ date=02/01/2021
 
 GET http://localhost:3006/note/1
 ###
+
+GET http://localhost:3006/note/1/edit
+###

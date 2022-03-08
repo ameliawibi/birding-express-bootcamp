@@ -328,7 +328,6 @@ app.get("/note/:id", (req, res) => {
   pool.query(sqlQuery, (error, result) => {
     if (error) {
       console.log("Error executing 1st query", error.stack);
-      res.status(404).send("Page not found!");
       return;
     }
     if (result.rows.length === 0) {
@@ -395,6 +394,95 @@ app.post("/note/:id/comment", commentValidationMessages, (req, res) => {
     if (commentQueryResult.rows) {
       // this is the output
       res.redirect(`/note/${id}`);
+    }
+  });
+});
+
+app.get("/note/:id/edit", (req, res) => {
+  const { id } = req.params;
+  if (req.cookies.loggedIn === undefined || req.cookies.userID === undefined) {
+    res.status(403).send("sorry, please log in!");
+    return;
+  }
+  sessionData = req.session;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    //store error message and session data
+    errorMessage = errors.errors;
+    sessionData = {
+      date: req.body.date,
+      time: req.body.time,
+      photo_url: req.body.photo_url,
+      flock_size: req.body.flock_size,
+    };
+    res.redirect(`/note/${id}/edit`);
+    return;
+  }
+  let sqlQuery = `SELECT * FROM notes INNER JOIN notes_behaviour ON notes.id = notes_behaviour.notes_id INNER JOIN behaviour ON behaviour.id = notes_behaviour.behaviour_id INNER JOIN species ON notes.species_id = species.id WHERE notes.id=${id}`;
+
+  pool.query(sqlQuery, (error, result) => {
+    if (error) {
+      console.log("Error executing 1st query", error.stack);
+      return;
+    }
+    if (result.rows.length === 0) {
+      res.status(404).send("Note not found!");
+      return;
+    }
+    if (result.rows) {
+      // this is the output
+      console.table(result.rows);
+      let dateTimeData = result.rows[0].date_time.split(" ");
+      //console.log(dateTimeData);
+
+      let ejsData = {
+        notes_id: id,
+        id: result.rows[0].id,
+        date: dateTimeData[0],
+        time: dateTimeData[1].concat(" ", dateTimeData[2]),
+        photo_url: result.rows[0].photo_url,
+        flock_size: result.rows[0].flock_size,
+        species_name: result.rows[0].species_name,
+        scientific_name: result.rows[0].scientific_name,
+        error: errorMessage,
+        actions: [],
+        action_values: [],
+      };
+      result.rows.forEach((data) => {
+        ejsData.action_values.push(data.actions);
+      });
+      errorMessage = [];
+      //console.log(ejsData);
+      pool.query(
+        "SELECT * from behaviour",
+        (behaviourOptionsError, behaviourOptionsResult) => {
+          if (behaviourOptionsError) {
+            console.log(
+              "Error behaviourOptionsResult",
+              behaviourOptionsError.stack
+            );
+            return;
+          }
+          ejsData.actions = behaviourOptionsResult.rows;
+          pool.query(
+            "SELECT * from species",
+            (speciesOptionsError, speciesOptionsResult) => {
+              if (speciesOptionsError) {
+                console.log(
+                  "Error speciesOptionsResult",
+                  speciesOptionsError.stack
+                );
+                return;
+              }
+              ejsData.species = speciesOptionsResult.rows;
+              console.log(ejsData);
+              errorMessage = [];
+              //res.send("get edit note success");
+              res.render("editNote", ejsData);
+            }
+          );
+        }
+      );
     }
   });
 });
