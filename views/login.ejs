@@ -1,4 +1,9 @@
 <%- include('header', {title: `Login`}); -%>
+<% if(error.length >0){ %>
+  <div class="bg-red-100 rounded-lg py-5 px-6 mb-4 text-base text-red-700 mb-3" role="alert">
+  You have entered an invalid email or password.
+</div>
+<% } %>
 <form autocomplete="off" action="/login" method="POST">
 <section class="h-screen">
   <div class="px-6 h-full text-gray-800">

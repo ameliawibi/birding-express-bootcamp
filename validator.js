@@ -29,3 +29,13 @@ export const notesValidationMessages = [
 export const commentValidationMessages = [
   check("comment").not().isEmpty().withMessage("This field is required"),
 ];
+
+export const loginValidationMessages = [
+  check("email")
+    .not()
+    .isEmpty()
+    .withMessage("This field is required")
+    .isEmail()
+    .withMessage("Invalid email format"),
+  check("password").not().isEmpty().withMessage("This field is required"),
+];

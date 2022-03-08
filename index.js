@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import {
   notesValidationMessages,
   commentValidationMessages,
+  loginValidationMessages,
 } from "./validator.js";
 import pg from "pg";
 import methodOverride from "method-override";
@@ -56,10 +57,22 @@ app.use(
 app.use(cookieParser());
 
 app.get("/signup", (req, res) => {
-  res.render("signUp");
+  let ejsData = {
+    error: errorMessage,
+  };
+  //console.log(ejsData);
+  errorMessage = [];
+  res.render("signUp", ejsData);
 });
 
-app.post("/signup", (req, res) => {
+app.post("/signup", loginValidationMessages, (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    //store error message and session data
+    errorMessage = errors.errors;
+    res.redirect("/signup");
+    return;
+  }
   // input the password from the request to the SHA object
   shaObj.update(req.body.password);
   // get the hashed password as output from the SHA object
@@ -81,10 +94,22 @@ app.post("/signup", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  let ejsData = {
+    error: errorMessage,
+  };
+  //console.log(ejsData);
+  errorMessage = [];
+  res.render("login", ejsData);
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", loginValidationMessages, (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    //store error message and session data
+    errorMessage = errors.errors;
+    res.redirect("/login");
+    return;
+  }
   const values = [req.body.email.toLowerCase()];
   //console.log(values);
 
@@ -101,7 +126,9 @@ app.post("/login", (req, res) => {
       if (result.rows.length === 0) {
         // we didnt find a user with that email.
         // the error for password and user are the same. don't tell the user which error they got for security reasons, otherwise people can guess if a person is a user of a given service.
-        res.status(403).send("User does not exist");
+        //store error message and session data
+        errorMessage = "User does not exists";
+        res.redirect("/login");
         return;
       }
 
@@ -120,7 +147,9 @@ app.post("/login", (req, res) => {
       } else {
         // password didn't match
         // the error for password and user are the same. don't tell the user which error they got for security reasons, otherwise people can guess if a person is a user of a given service.
-        res.status(403).send("User does not exist");
+        //store error message and session data
+        errorMessage = "User does not exists";
+        res.redirect("/login");
       }
     }
   );
