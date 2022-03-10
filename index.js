@@ -196,7 +196,11 @@ app.get("/note", (req, res) => {
     time: "time" in sessionData ? sessionData.time : "",
     photo_url: "photo_url" in sessionData ? sessionData.photo_url : "",
     flock_size: "flock_size" in sessionData ? sessionData.flock_size : "",
+    action_values:
+      "action_values" in sessionData ? sessionData.action_values : [],
+    species_id: "species" in sessionData ? sessionData.species : "",
   };
+  console.log(data);
   sessionData = req.session;
   pool.query("SELECT * from behaviour", (error, behaviourOptionsResult) => {
     if (error) {
@@ -204,7 +208,8 @@ app.get("/note", (req, res) => {
       return;
     }
     data.actions = behaviourOptionsResult.rows;
-    //console.log(data);
+
+    console.log(data);
     pool.query("SELECT * from species", (error, speciesOptionsResult) => {
       if (error) {
         console.log("Error speciesOptionsResult", error.stack);
@@ -235,6 +240,8 @@ app.post("/note", notesValidationMessages, (req, res) => {
       time: req.body.time,
       photo_url: req.body.photo_url,
       flock_size: req.body.flock_size,
+      species: req.body.species,
+      action_values: req.body.behaviour,
     };
     res.redirect("/note");
     return;

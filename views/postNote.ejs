@@ -64,8 +64,9 @@
       m-0
       focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example">
     <option value="" disabled selected hidden>Select species</option>
-  <% species.forEach((item) => { %>
-    <option value="<%= item.id %>"><%= item.species_name %></option>
+<% species.forEach((item) => { %>
+      <% let selectBoolean = ( species_id == item.id ) ? "selected" : ""; %>
+    <option value="<%= item.id %>" <%= selectBoolean %> ><%= item.species_name %></option>
     <% }); %>
   </select>
 </label>
@@ -75,9 +76,12 @@
       <label for ="behaviour" class="label">
   Behaviour
   <select name="behaviour" class="form-multiselect block w-full mt-1 input" multiple>
+
 <% actions.forEach((item) => { %>
-    <option value="<%= item.id %>"><%= item.actions %></option>
-    <% }); %>
+    <% let selectBehv = (action_values.includes(item.id.toString())) ? "selected" : ""; %>
+    <option value="<%= item.id %>" <%= selectBehv %> ><%= item.actions %></option>
+ <% }); %>
+
   </select>
 </label>
 <p class="errormsg"><%= error.filter(item => item.param === 'behaviour').map(item => item.msg) %></p>
