@@ -337,6 +337,7 @@ app.get("/note/:id", (req, res) => {
     if (result.rows) {
       // this is the output
       //console.table(result.rows);
+
       let ejsData = {
         notes_id: id,
         id: result.rows[0].id,
@@ -404,17 +405,11 @@ app.get("/note/:id/edit", (req, res) => {
     res.status(403).send("sorry, please log in!");
     return;
   }
-  sessionData = req.session;
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     //store error message and session data
     errorMessage = errors.errors;
-    sessionData = {
-      date: req.body.date,
-      time: req.body.time,
-      photo_url: req.body.photo_url,
-      flock_size: req.body.flock_size,
-    };
     res.redirect(`/note/${id}/edit`);
     return;
   }
@@ -431,17 +426,25 @@ app.get("/note/:id/edit", (req, res) => {
     }
     if (result.rows) {
       // this is the output
-      console.table(result.rows);
+      //console.table(result.rows);
       let dateTimeData = result.rows[0].date_time.split(" ");
       //console.log(dateTimeData);
-
       let ejsData = {
         notes_id: id,
         id: result.rows[0].id,
-        date: dateTimeData[0],
-        time: dateTimeData[1].concat(" ", dateTimeData[2]),
-        photo_url: result.rows[0].photo_url,
-        flock_size: result.rows[0].flock_size,
+        date: "date" in sessionData ? sessionData.date : dateTimeData[0],
+        time:
+          "time" in sessionData
+            ? sessionData.time
+            : dateTimeData[1].concat(" ", dateTimeData[2]),
+        photo_url:
+          "photo_url" in sessionData
+            ? sessionData.photo_url
+            : result.rows[0].photo_url,
+        flock_size:
+          "flock_size" in sessionData
+            ? sessionData.flock_size
+            : result.rows[0].flock_size,
         species_name: result.rows[0].species_name,
         scientific_name: result.rows[0].scientific_name,
         error: errorMessage,
@@ -452,6 +455,7 @@ app.get("/note/:id/edit", (req, res) => {
         ejsData.action_values.push(data.actions);
       });
       errorMessage = [];
+      sessionData = req.session;
       //console.log(ejsData);
       pool.query(
         "SELECT * from behaviour",
@@ -475,7 +479,7 @@ app.get("/note/:id/edit", (req, res) => {
                 return;
               }
               ejsData.species = speciesOptionsResult.rows;
-              console.log(ejsData);
+              //console.log(ejsData);
               errorMessage = [];
               //res.send("get edit note success");
               res.render("editNote", ejsData);
@@ -485,6 +489,87 @@ app.get("/note/:id/edit", (req, res) => {
       );
     }
   });
+});
+
+app.put("/note/:id/edit", notesValidationMessages, (req, res) => {
+  const { id } = req.params;
+  if (req.cookies.loggedIn === undefined || req.cookies.userID === undefined) {
+    res.status(403).send("sorry, please log in!");
+    return;
+  }
+  sessionData = req.session;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    //store error message and session data
+    errorMessage = errors.errors;
+    sessionData = {
+      date: req.body.date,
+      time: req.body.time,
+      photo_url: req.body.photo_url,
+      flock_size: req.body.flock_size,
+      species: req.body.species,
+      action_values: req.body.behaviour,
+    };
+    console.log(sessionData);
+    res.redirect(`/note/${id}/edit`);
+    return;
+  }
+  //console.log(req.body);
+  const notes = req.body;
+  const datetime = notes.date.concat(" ", notes.time);
+  //console.log(datetime);
+  const notesQuery = `UPDATE "notes" SET "date_time"=$1, "photo_url"=$2, "flock_size"=$3, "species_id" =$4 ,"user_id"=$5 WHERE id=${id} RETURNING ID`;
+
+  const notesInputData = [
+    datetime,
+    notes.photo_url,
+    Number(notes.flock_size),
+    Number(notes.species),
+    Number(req.cookies.userID),
+  ];
+
+  pool.query(
+    notesQuery,
+    notesInputData,
+    (notesQueryError, notesQueryResult) => {
+      if (notesQueryError) {
+        console.error("Notes query error", notesQueryError);
+        return;
+      }
+
+      //delete all rows of behaviour
+      pool.query(
+        `DELETE from notes_behaviour WHERE notes_id=${id};`,
+        (deleteError, deleteResult) => {
+          if (deleteError) {
+            console.error("Notes query error", deleteError);
+            return;
+          }
+          //console.table(notesQueryResult.rows); //return id for notes_id
+          const behaviourArray = notes.behaviour;
+          const noteId = notesQueryResult.rows[0].id;
+          //console.log(`noteId =${noteId}`);
+          behaviourArray.forEach((behaviourId) => {
+            const behaviourQuery = `INSERT INTO notes_behaviour (notes_id,behaviour_id) VALUES ($1,$2) returning behaviour_id`;
+            const behaviourData = [noteId, behaviourId];
+            //insert action into behaviour table
+            pool.query(
+              behaviourQuery,
+              behaviourData,
+              (behaviourQueryError, behaviourQueryResult) => {
+                if (behaviourQueryError) {
+                  console.log("behaviour query error", behaviourQueryError);
+                } else {
+                  console.table(behaviourQueryResult.rows);
+                }
+              }
+            );
+          });
+          res.redirect(`/note/${noteId}`);
+        }
+      );
+    }
+  );
 });
 
 app.listen(3006);
