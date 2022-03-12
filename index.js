@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import { validationResult } from "express-validator";
 import {
   notesValidationMessages,
@@ -11,6 +11,7 @@ import methodOverride from "method-override";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import jsSHA from "jssha";
+import { getHashString, getHashedCookie } from "./hash.js";
 
 const { Pool } = pg;
 // set the way we will connect to the server
@@ -74,11 +75,7 @@ app.post("/signup", loginValidationMessages, (req, res) => {
     res.redirect("/signup");
     return;
   }
-  // input the password from the request to the SHA object
-  shaObj.update(req.body.password);
-  // get the hashed password as output from the SHA object
-  const hashedPassword = shaObj.getHash("HEX");
-
+  const hashedPassword = getHashString(req.body.password);
   const values = [req.body.email, hashedPassword];
 
   pool.query(
@@ -141,6 +138,10 @@ app.post("/login", loginValidationMessages, (req, res) => {
       if (user.user_password === hashedPassword) {
         res.cookie("loggedIn", true);
         res.cookie("userID", `${user.id}`);
+        const salt = "SALTY";
+        const hashedCookieString = getHashedCookie(user.id, salt);
+        res.cookie("loggedInHash", hashedCookieString);
+
         res.redirect("/");
       } else {
         // password didn't match
