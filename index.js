@@ -451,7 +451,12 @@ app.get("/note/:id/edit", (req, res) => {
     }
     if (result.rows) {
       // this is the output
-      //console.table(result.rows);
+      const noteUserId = result.rows[0].user_id;
+      const hashedUserId = getHashedCookie(noteUserId, salt);
+      if (hashedUserId !== hashedCookieString) {
+        res.status(403).send("You dont have permission to edit");
+        return;
+      }
       let dateTimeData = result.rows[0].date_time.split(" ");
       //console.log(dateTimeData);
       let ejsData = {
