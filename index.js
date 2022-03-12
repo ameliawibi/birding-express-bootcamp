@@ -1,4 +1,5 @@
-import express, { response } from "express";
+import "dotenv/config";
+import express from "express";
 import { validationResult } from "express-validator";
 import {
   notesValidationMessages,
@@ -29,17 +30,7 @@ const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
 
 let errorMessage = [];
 let sessionData = {};
-const salt = "SALTY";
-const whenQueryDone = (error, result) => {
-  if (error) {
-    console.log("Error executing query", error.stack);
-    return;
-  }
-  if (result.rows) {
-    // this is the output
-    console.table(result.rows);
-  }
-};
+const salt = process.env.SECRET_KEY;
 
 const app = express();
 app.set("view engine", "ejs");
@@ -367,11 +358,17 @@ app.get("/note/:id", (req, res) => {
         scientific_name: result.rows[0].scientific_name,
         error: errorMessage,
         actions: [],
+        can_edit: false,
       };
       result.rows.forEach((data) => {
         ejsData.actions.push(data.actions);
       });
       errorMessage = [];
+      const noteUserId = result.rows[0].user_id;
+      const hashedUserId = getHashedCookie(noteUserId, salt);
+      if (hashedUserId === hashedCookieString) {
+        ejsData.can_edit = true;
+      }
       //console.log(ejsData);
 
       let commentQuery = `SELECT * FROM comments WHERE notes_id=${id}`;
@@ -454,7 +451,7 @@ app.get("/note/:id/edit", (req, res) => {
       const noteUserId = result.rows[0].user_id;
       const hashedUserId = getHashedCookie(noteUserId, salt);
       if (hashedUserId !== hashedCookieString) {
-        res.status(403).send("You dont have permission to edit");
+        res.status(403).send("You don't have permission to edit");
         return;
       }
       let dateTimeData = result.rows[0].date_time.split(" ");
