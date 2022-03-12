@@ -29,7 +29,7 @@ const shaObj = new jsSHA("SHA-512", "TEXT", { encoding: "UTF8" });
 
 let errorMessage = [];
 let sessionData = {};
-
+const salt = "SALTY";
 const whenQueryDone = (error, result) => {
   if (error) {
     console.log("Error executing query", error.stack);
@@ -131,14 +131,10 @@ app.post("/login", loginValidationMessages, (req, res) => {
       }
 
       const user = result.rows[0];
-      // input the password from the request to the SHA object
-      shaObj.update(req.body.password);
-      // get the hashed value as output from the SHA object
-      const hashedPassword = shaObj.getHash("HEX");
+      const hashedPassword = getHashString(req.body.password);
       if (user.user_password === hashedPassword) {
-        res.cookie("loggedIn", true);
         res.cookie("userID", `${user.id}`);
-        const salt = "SALTY";
+
         const hashedCookieString = getHashedCookie(user.id, salt);
         res.cookie("loggedInHash", hashedCookieString);
 
@@ -155,14 +151,17 @@ app.post("/login", loginValidationMessages, (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-  res.clearCookie("loggedIn");
+  res.clearCookie("loggedInHash");
   res.clearCookie("userID");
   req.session.destroy();
   res.redirect("/login");
 });
 
 app.get("/", (req, res) => {
-  if (req.cookies.loggedIn === undefined) {
+  const user_id = req.cookies.userID;
+  const hashedCookieString = getHashedCookie(user_id, salt);
+
+  if (req.cookies.loggedInHash !== hashedCookieString) {
     res.status(403).send("sorry, please log in!");
     return;
   }
@@ -188,7 +187,10 @@ app.get("/", (req, res) => {
 });
 
 app.get("/note", (req, res) => {
-  if (req.cookies.loggedIn === undefined) {
+  const user_id = req.cookies.userID;
+  const hashedCookieString = getHashedCookie(user_id, salt);
+
+  if (req.cookies.loggedInHash !== hashedCookieString) {
     res.status(403).send("sorry, please log in!");
     return;
   }
@@ -227,7 +229,10 @@ app.get("/note", (req, res) => {
 });
 
 app.post("/note", notesValidationMessages, (req, res) => {
-  if (req.cookies.loggedIn === undefined || req.cookies.userID === undefined) {
+  const user_id = req.cookies.userID;
+  const hashedCookieString = getHashedCookie(user_id, salt);
+
+  if (req.cookies.loggedInHash !== hashedCookieString) {
     res.status(403).send("sorry, please log in!");
     return;
   }
@@ -297,7 +302,10 @@ app.post("/note", notesValidationMessages, (req, res) => {
 });
 
 app.post("/species", speciesValidationMessages, (req, res) => {
-  if (req.cookies.loggedIn === undefined) {
+  const user_id = req.cookies.userID;
+  const hashedCookieString = getHashedCookie(user_id, salt);
+
+  if (req.cookies.loggedInHash !== hashedCookieString) {
     res.status(403).send("sorry, please log in!");
     return;
   }
@@ -323,7 +331,10 @@ app.post("/species", speciesValidationMessages, (req, res) => {
 });
 
 app.get("/note/:id", (req, res) => {
-  if (req.cookies.loggedIn === undefined) {
+  const user_id = req.cookies.userID;
+  const hashedCookieString = getHashedCookie(user_id, salt);
+
+  if (req.cookies.loggedInHash !== hashedCookieString) {
     res.status(403).send("sorry, please log in!");
     return;
   }
@@ -381,7 +392,10 @@ app.get("/note/:id", (req, res) => {
 
 app.post("/note/:id/comment", commentValidationMessages, (req, res) => {
   const { id } = req.params;
-  if (req.cookies.loggedIn === undefined) {
+  const user_id = req.cookies.userID;
+  const hashedCookieString = getHashedCookie(user_id, salt);
+
+  if (req.cookies.loggedInHash !== hashedCookieString) {
     res.status(403).send("sorry, please log in!");
     return;
   }
@@ -409,7 +423,10 @@ app.post("/note/:id/comment", commentValidationMessages, (req, res) => {
 
 app.get("/note/:id/edit", (req, res) => {
   const { id } = req.params;
-  if (req.cookies.loggedIn === undefined || req.cookies.userID === undefined) {
+  const user_id = req.cookies.userID;
+  const hashedCookieString = getHashedCookie(user_id, salt);
+
+  if (req.cookies.loggedInHash !== hashedCookieString) {
     res.status(403).send("sorry, please log in!");
     return;
   }
@@ -501,7 +518,10 @@ app.get("/note/:id/edit", (req, res) => {
 
 app.put("/note/:id/edit", notesValidationMessages, (req, res) => {
   const { id } = req.params;
-  if (req.cookies.loggedIn === undefined || req.cookies.userID === undefined) {
+  const user_id = req.cookies.userID;
+  const hashedCookieString = getHashedCookie(user_id, salt);
+
+  if (req.cookies.loggedInHash !== hashedCookieString) {
     res.status(403).send("sorry, please log in!");
     return;
   }
